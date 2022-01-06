@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "blinky-libopencm3",
+			"path": ".."
+		},
+		{
+			"name": "display-libopencm3",
+			"path": "../../display-libopencm3"
+		}
+	],
+	"settings": {}
+}
