@@ -86,11 +86,15 @@ void usb_init()
 // Called when the host connects to the device and selects a configuration
 void usb_set_config(usbd_device *usbd_dev, __attribute__((unused)) uint16_t wValue)
 {
+
     register_wcid_desc(usbd_dev);
+
+    //the functions that call the control callback are in usb_control.c (same file that contains register_control_callback)
     usbd_register_control_callback(usbd_dev,
                                    USB_REQ_TYPE_VENDOR | USB_REQ_TYPE_INTERFACE,
                                    USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
-                                   handle_led_req);
+                                   handle_led_req); 
+                                   
     usbd_register_control_callback(usbd_dev,
                                    USB_REQ_TYPE_IN | USB_REQ_TYPE_VENDOR | USB_REQ_TYPE_INTERFACE,
                                    USB_REQ_TYPE_DIRECTION | USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
@@ -156,17 +160,24 @@ usbd_request_return_codes handle_data_req(__attribute__((unused)) usbd_device *u
                                     uint8_t **buf __attribute__((unused)), uint16_t *len,
                                     __attribute__((unused)) usbd_control_complete_callback *complete)
 {
+    // The expected request format is (bmRequestType is filtered by callback registration):
+    // bmRequestType = 0x   C1 (data direction: host to device, type: vendor, recipient: interface)
+    // bmRequest: 0x34 (pushbutton read request)
+    // wValue: irrelevant
+    // wIndex: 0 (interface number)
     if (req->bRequest == PUSHBUTTON_REQ_ID && req->wIndex == 0)
     {
         bool pushbutton_state = gpio_get(GPIOB, GPIO8);
-        uint8_t N_BYTES = 1;
+        uint8_t N_BYTES = 1; //send back just one byte
         if(pushbutton_state == 1) 
         {
-            usbd_control_buffer[0] = 0x01;
+            //send back 0x01
+            (*buf)[0] = 0x01;
         }
         else  
         {
-            usbd_control_buffer[0] = 0x00;
+            //send back 0x00
+            (*buf)[0] = 0x00;
         }
         *len = N_BYTES;
         return USBD_REQ_HANDLED;
