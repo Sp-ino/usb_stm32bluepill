@@ -3,11 +3,10 @@
 #include <libopencm3/stm32/usbd.h>
 #include "wcid.h"
 #include "usb_descriptor.h"
+#include "buffer.h"
 
 
-#define BUFFER_LEN 64
-
-static uint8_t buffer[BUFFER_LEN];
+static buffer data_buffer;
 
 static void usb_set_config(usbd_device *usbd_dev, uint16_t wValue);
 static void handle_bulk_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused)));

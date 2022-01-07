@@ -20,10 +20,10 @@ static void put_hex(uint32_t value, char *buf, int len);
 static char serial_num[13];
 
 const char *const usb_desc_strings[] = {
-    "Tutorial",          //  USB Manufacturer
-    "Display",           //  USB Product
+    "spino",          //  USB Manufacturer
+    "Repeater",           //  USB Product
     serial_num,          //  Serial number
-    "Display Interface", //  Data interface
+    "Repeater Interface", //  Data interface
 };
 
 enum usb_strings_index
@@ -42,7 +42,7 @@ static const struct usb_endpoint_descriptor comm_endpoint_descs[] = {
         .bmAttributes = USB_ENDPOINT_ATTR_BULK,
         .wMaxPacketSize = BULK_MAX_PACKET_SIZE,
         .bInterval = 0,
-        .extra = nullptr,
+        .extra = NULL,
         .extralen = 0,
     },
 };
@@ -59,7 +59,7 @@ static const struct usb_interface_descriptor comm_if_descs[] = {
         .bInterfaceProtocol = 0, // vendor specific
         .iInterface = USB_STRINGS_DATA_IF_ID,
         .endpoint = comm_endpoint_descs,
-        .extra = nullptr,
+        .extra = NULL,
         .extralen = 0,
     },
 };
