@@ -10,11 +10,12 @@
 
 #include "usb_descriptor.h"
 #include <libopencm3/stm32/desig.h>
+#include <stdlib.h>
 
 static void put_hex(uint32_t value, char *buf, int len);
 
 #define USB_VID 0xcafe        // Vendor ID
-#define USB_PID 0xceaf        // Product ID
+#define USB_PID 0xcafe        // Product ID
 #define USB_DEVICE_REL 0x0061 // release 0.6.1
 
 static char serial_num[13];
@@ -45,6 +46,16 @@ static const struct usb_endpoint_descriptor comm_endpoint_descs[] = {
         .extra = NULL,
         .extralen = 0,
     },
+    {
+        .bLength = USB_DT_ENDPOINT_SIZE,
+        .bDescriptorType = USB_DT_ENDPOINT,
+        .bEndpointAddress = EP_DATA_IN,
+        .bmAttributes = USB_ENDPOINT_ATTR_BULK,
+        .wMaxPacketSize = BULK_MAX_PACKET_SIZE,
+        .bInterval = 0,
+        .extra = NULL,
+        .extralen = 0,
+    },
 };
 
 static const struct usb_interface_descriptor comm_if_descs[] = {
@@ -66,9 +77,9 @@ static const struct usb_interface_descriptor comm_if_descs[] = {
 
 static const struct usb_interface usb_interfaces[] = {
     {
-        .cur_altsetting = nullptr,
+        .cur_altsetting = NULL,
         .num_altsetting = sizeof(comm_if_descs) / sizeof(comm_if_descs[0]),
-        .iface_assoc = nullptr,
+        .iface_assoc = NULL,
         .altsetting = comm_if_descs,
     },
 };
@@ -104,7 +115,7 @@ const struct usb_device_descriptor usb_device_desc = {
     .bNumConfigurations = sizeof(usb_config_descs) / sizeof(usb_config_descs[0]),
 };
 
-void usb_init_serial_num()
+void usb_init_serial_num(void)
 {
     uint32_t id0 = DESIG_UNIQUE_ID0;
     uint32_t id1 = DESIG_UNIQUE_ID1;
@@ -117,7 +128,7 @@ void usb_init_serial_num()
     serial_num[12] = 0;
 }
 
-const static char HEX_DIGITS[] = "0123456789ABCDEF";
+static const char HEX_DIGITS[] = "0123456789ABCDEF";
 
 void put_hex(uint32_t value, char *buf, int len)
 {

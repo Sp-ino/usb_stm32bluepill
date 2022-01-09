@@ -18,6 +18,7 @@
 
 // Endpoint number for data transmission from host to device
 #define EP_DATA_OUT 0x01
+#define EP_DATA_IN 0x81
 
 // Interface index
 #define INTF_COMM 0
@@ -29,6 +30,6 @@ extern const struct usb_device_descriptor usb_device_desc;
 // USB device configurations
 extern const struct usb_config_descriptor usb_config_descs[];
 
-void usb_init_serial_num();
+void usb_init_serial_num(void);
 
 #endif
