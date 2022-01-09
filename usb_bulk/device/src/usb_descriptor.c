@@ -132,9 +132,9 @@ static const char HEX_DIGITS[] = "0123456789ABCDEF";
 
 void put_hex(uint32_t value, char *buf, int len)
 {
-    for (int idx = 0; idx < len; idx++)
+    for (int index = 0; index < len; index++)
     {
-        buf[idx] = HEX_DIGITS[value >> 28];
+        buf[index] = HEX_DIGITS[value >> 28];
         value = value << 4;
     }
 }

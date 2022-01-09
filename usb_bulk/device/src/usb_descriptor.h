@@ -18,7 +18,7 @@
 
 // Endpoint number for data transmission from host to device
 #define EP_DATA_OUT 0x01
-#define EP_DATA_IN 0x81
+#define EP_DATA_IN 0x82
 
 // Interface index
 #define INTF_COMM 0

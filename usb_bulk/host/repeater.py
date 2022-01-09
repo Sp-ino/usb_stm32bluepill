@@ -13,7 +13,7 @@ import time
 #import numpy as np
 
 WRITE_EP = 0x01
-READ_EP = 0x81
+READ_EP = 0x82
 
 data = array.array('B', [0xFF for i in range(1,64)])
 # readarr = array.array('B', [0x00 for i in range(1, 128)])
@@ -40,14 +40,19 @@ for config in dev:
 dev.set_configuration()
 
 dev.write(WRITE_EP, data)
-time.sleep(1)
+time.sleep(0.2)
 readbuf = dev.read(READ_EP, 64)
 print(readbuf)
 
 while True:
     data = input("Valori da inviare: ")
-    writelen = dev.write(WRITE_EP, data)
+    
+    #the string must be sliced because it cannot exceed the packet length.
+    #this is due to the fact that the buffer implemented within the firmware is
+    #exactly one packet long, which implies that the command line output will be 
+    #delayed by one packet if more than 64 bytes at a time are sent.
+    writelen = dev.write(WRITE_EP, data[0:64]) 
     print(writelen)
-    time.sleep(1)
+    time.sleep(0.2)
     readbuf = dev.read(READ_EP, 64)
     print(readbuf)

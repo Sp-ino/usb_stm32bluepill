@@ -6,12 +6,12 @@
 #include "common.h"
 
 
-//static buffer rx_buffer;
+//static buffer packet_buffer;
 // #define BUFFER_LEN_PACKETS 1
 // #define BUFFER_LEN_BYTES (BUFFER_LEN_PACKETS * BULK_MAX_PACKET_SIZE)
 #define BUFFER_LEN_BYTES 64
 
-static uint8_t rx_buffer[BUFFER_LEN_BYTES];
+static uint8_t packet_buffer[BUFFER_LEN_BYTES];
 static volatile bool is_configured = false;
 static volatile bool is_data_received = false;
 
@@ -90,20 +90,38 @@ void usb_set_config(usbd_device *usbd_dev,
                 USB_ENDPOINT_ATTR_BULK,
                 BULK_MAX_PACKET_SIZE,
                 NULL);
-                
+
     is_configured = true;
     led_blink();
 }
 
 
-//this callback function is called when a packet is received. It stores the packet inside the buffer and sets the 
+//this callback function is called when a packet is received. It stores the packet inside the buffer 
+//and sets the endpoint to NAK
 static void handle_bulk_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused)))
 {
-    unsigned len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, rx_buffer, sizeof(rx_buffer));
-    if (len > 0) {
+    if (usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, packet_buffer, sizeof(packet_buffer)) > 0) {
         is_data_received = true;
+        usbd_ep_nak_set(usbd_dev, EP_DATA_OUT, 1);
     }
-    usbd_ep_nak_set(usbd_dev, EP_DATA_OUT, 1);
+}
+
+
+static void handle_bulk_tx(void)
+{
+    if (is_configured && is_data_received)
+    {
+        if(usbd_ep_write_packet(usb_device, EP_DATA_IN, packet_buffer, sizeof(packet_buffer)) > 0)
+        {
+            usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0);
+            is_data_received = false;
+
+            for (uint16_t index = 0; index < BUFFER_LEN_BYTES; index++)
+            {
+                packet_buffer[index] = 0x00;
+            }
+        }
+    }
 }
 
 
@@ -114,12 +132,7 @@ int main(void)
 
     while(1) 
     {
-        if (is_configured && is_data_received)
-        {
-            usbd_ep_write_packet(usb_device, EP_DATA_IN, rx_buffer, sizeof(rx_buffer));
-            usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0);
-            is_data_received = false;
-        }
+        handle_bulk_tx();
     }
 
     return 0;
