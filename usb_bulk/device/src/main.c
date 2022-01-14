@@ -1,8 +1,17 @@
+/*
+ * USB bulk transfer example
+ * 
+ * Copyright (c) 2022 Valerio Spinogatti
+ * Licensed under GNU license
+ * 
+ * main.c
+ */
+
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
 #include <stdlib.h>
-#include "usb_descriptor.h"
+#include "descriptor.h"
 #include "common.h"
 
 
@@ -31,7 +40,7 @@ static void led_blink(void)
     for (int i = 0; i < 8; i++) 
     {
         gpio_toggle(GPIOC, GPIO13);
-        delay(200);
+        delay(50);
     }
 }
 
@@ -59,11 +68,9 @@ static void usb_init(void)
     gpio_clear(GPIOA, GPIO12);
     delay(80);
 
-    usb_init_serial_num();
-
     // create USB device
     usb_device = usbd_init(&st_usbfs_v1_usb_driver, &usb_device_desc, usb_config_descs,
-                        usb_desc_strings, sizeof(usb_desc_strings) / sizeof(usb_desc_strings[0]),
+                        usb_strings, sizeof(usb_strings) / sizeof(usb_strings[0]),
                         usbd_control_buffer, sizeof(usbd_control_buffer));
 
     // Set callback for config calls
@@ -125,6 +132,7 @@ static void handle_bulk_tx(void)
 }
 
 
+/* main function*/
 int main(void) 
 {
     sys_init();

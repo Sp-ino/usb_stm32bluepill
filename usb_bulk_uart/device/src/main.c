@@ -12,13 +12,14 @@
 #include "uart.h"
 
 
-/*main loop*/
+/*main function*/
 int main(void) 
 {
     sys_init();
     usb_init();
     uart_init();
 
+    //main loop
     while(1) 
     {
         handle_buffer_full();
