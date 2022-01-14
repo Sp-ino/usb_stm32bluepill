@@ -140,6 +140,7 @@ int main(void)
 
     while(1) 
     {
+        //main loop
         handle_bulk_tx();
     }
 
