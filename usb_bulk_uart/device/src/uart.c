@@ -1,3 +1,12 @@
+/*
+ * USB bulk transfer example with UART communication
+ * 
+ * Copyright (c) 2022 Valerio Spinogatti
+ * Licensed under GNU license
+ * 
+ * uart.c
+ */
+
 #include "uart.h"
 
 
