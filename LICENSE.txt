@@ -3,7 +3,7 @@ restrictions, as this project uses multiple open-source projects.
 Files in this project without any specific license can be assumed
 to follow the following general clause:
 
-This repository is free software: you can redistribute it and/or modify
+This repository contains free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
