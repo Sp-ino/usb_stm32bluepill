@@ -28,7 +28,7 @@ data = array.array('B', [0xFF for i in range(0,64)])
 
 
 # find device
-dev = usb.core.find(idVendor=0xcafe, idProduct=0xcafe)
+dev = usb.core.find(idVendor=0x0297, idProduct=0x0297)
 
 if dev is None:
     sys.exit("repeater: device not found")
@@ -50,7 +50,7 @@ dev.set_configuration()
 dev.write(WRITE_EP, data)
 time.sleep(0.2)
 readbuf = dev.read(READ_EP, 64)
-print(readbuf)
+print(readbuf.tobytes())
 
 while True:
     data = input("Valori da inviare: ")
@@ -60,18 +60,18 @@ while True:
     #exactly one packet long, which implies that the command line output will be 
     #delayed by one packet if more than 64 bytes at a time are sent.
     try:
-        writelen = dev.write(WRITE_EP, data) 
+        writelen = dev.write(WRITE_EP, data[0:64]) 
         print(writelen)
     except usb.USBError:
         try:
             readbuf = dev.read(READ_EP, 64)
-            print(readbuf)
+            print(readbuf.tobytes())
         except:
             print("Could not write")
         
     time.sleep(0.2)
     try:
         readbuf = dev.read(READ_EP, 64)
-        print(readbuf)
+        print(readbuf.tobytes())
     except:
         print("Could not read")
