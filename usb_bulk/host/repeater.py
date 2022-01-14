@@ -12,7 +12,6 @@ Copyright (c) 2022 Valerio Spinogatti
 Licensed under GNU license
  
 repeater.py
- 
 """
 
 import usb.core

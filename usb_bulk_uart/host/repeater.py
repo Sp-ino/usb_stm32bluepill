@@ -4,6 +4,14 @@
 Created on Sat Jan  8 17:17:54 2022
 
 @author: spino
+
+
+USB bulk transfer example with UART communication
+ 
+Copyright (c) 2022 Valerio Spinogatti
+Licensed under GNU license
+ 
+repeater.py
 """
 
 import usb.core
@@ -13,7 +21,6 @@ import time
 
 
 WRITE_EP = 0x01
-READ_EP = 0x82
 PACKET_SIZE_BYTES = 64
 BUFFER_SIZE_PACKETS = 4
 BUFFER_SIZE_BYTES = BUFFER_SIZE_PACKETS * PACKET_SIZE_BYTES
