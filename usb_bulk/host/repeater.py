@@ -4,6 +4,15 @@
 Created on Sat Jan  8 17:17:54 2022
 
 @author: spino
+
+
+USB bulk transfer example with UART communication
+ 
+Copyright (c) 2022 Valerio Spinogatti
+Licensed under GNU license
+ 
+repeater.py
+ 
 """
 
 import usb.core
