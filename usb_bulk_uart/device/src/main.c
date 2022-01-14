@@ -7,7 +7,6 @@
  * main.c
  */
 
-
 #include "usbcustom.h"
 #include "util.h"
 #include "uart.h"

@@ -29,7 +29,7 @@ USB_TIMEOUT = 5000
 
 #-----------------------------Initialization-----------------------------------
 # find device
-dev = usb.core.find(idVendor=0xcafe, idProduct=0xcafe)
+dev = usb.core.find(idVendor=0x0297, idProduct=0x0297)
 
 if dev is None:
     sys.exit("repeater: device not found")

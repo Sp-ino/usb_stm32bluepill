@@ -37,11 +37,11 @@ void usb_init(void)
     gpio_clear(GPIOA, GPIO12);
     delay(80);
 
-    usb_init_serial_num();
+    //usb_init_serial_num();
 
     // create USB device
     usb_device = usbd_init(&st_usbfs_v1_usb_driver, &usb_device_desc, usb_config_descs,
-                        usb_desc_strings, sizeof(usb_desc_strings) / sizeof(usb_desc_strings[0]),
+                        usb_strings, sizeof(usb_strings) / sizeof(usb_strings[0]),
                         usbd_control_buffer, sizeof(usbd_control_buffer));
 
     // Set callback for config calls

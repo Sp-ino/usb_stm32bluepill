@@ -7,16 +7,18 @@
  * uart.h
  */
 
+#ifndef USBCUSTOM_H
+#define USBCUSTOM_H
+
+
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
 #include <stdlib.h>
-#include "usb_descriptor.h"
+#include "descriptor.h"
 #include "common.h"
 #include "util.h"
 
-#ifndef USBCUSTOM_H
-#define USBCUSTOM_H
 
 //constant definitions
 #define BUFFER_LEN_PACKETS 4

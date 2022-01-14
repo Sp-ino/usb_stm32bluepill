@@ -7,13 +7,14 @@
  * uart.h
  */
 
+#ifndef UART_H
+#define UART_H
+
+
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
 
-
-#ifndef UART_H
-#define UART_H
 
 /*Initialize UART*/
 void uart_init(void);
