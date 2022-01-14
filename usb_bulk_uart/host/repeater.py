@@ -20,6 +20,7 @@ import sys
 import time
 
 
+#constant definitions
 WRITE_EP = 0x01
 PACKET_SIZE_BYTES = 64
 BUFFER_SIZE_PACKETS = 4
@@ -50,14 +51,16 @@ for config in dev:
 # set configuration
 dev.set_configuration()
 
-
 #write initial data. It is an array of 128 bytes of value 0xFF
 initial_data = array.array('B', [0x30 for i in range(0,PACKET_SIZE_BYTES)])
 try:
     writelen = dev.write(WRITE_EP, initial_data, timeout = USB_TIMEOUT)
 except: 
     print("USB initial write failed")
-
+    
+if writelen:
+    print("Number of bytes sent: ", writelen)
+    
 
 #------------------------------Main while loop---------------------------------
 while True:
@@ -70,4 +73,4 @@ while True:
         print("USB write failed")
         
     if writelen:
-        print(writelen)
+        print("Number of bytes sent: ", writelen)
