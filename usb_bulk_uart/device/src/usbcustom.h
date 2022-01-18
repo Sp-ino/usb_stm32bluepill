@@ -46,11 +46,6 @@ calling the uart_tx function when the buffer is full. Once data has
 been sent, the buffer is shifted towards left by the exact amount 
 of bytes that has been transmitted and the OUT endpoint is set to 
 VALID, so that new data can be received*/
-void handle_bulk_tx(void);
-
-/*USB interrupt handler; used to call usbd_poll()
-(must be called periodically for the USB communication 
-to work properly)*/
 void handle_buffer_full(void);
 
 #endif
