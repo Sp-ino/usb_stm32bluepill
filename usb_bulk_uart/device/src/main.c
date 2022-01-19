@@ -12,7 +12,9 @@
 #include "uart.h"
 
 
-/*main function*/
+/**
+ * @brief Main function
+ */
 int main(void) 
 {
     sys_init();

@@ -12,7 +12,7 @@
 
 
 /**
- * @brief Init UART
+ * @brief Initialize UART
  */
 void uart_init(void);
 
