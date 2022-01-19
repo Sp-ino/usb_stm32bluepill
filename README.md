@@ -7,4 +7,4 @@ usb_bulk contains code that exemplifies usb bulk transfer in both directions (IN
 
 usb_bulk_uart contains sw and fw that allows the stm32 to read bytes from USB and to send them back over UART.
 
-usb_bulk_uart_2 contains sw and fw that allows the stm32 to read bytes from USB and to send them back over UART. This project however should have some improved features, like control requests implemented (for reading the content of the device buffer) and other stuff.
+usb_bulk_uart_2 contains sw and fw that allows the stm32 to read bytes from USB and to send them back over UART. This project, however, should have some improved features, like control requests implemented (for reading the content of the device buffer) and other stuff.
