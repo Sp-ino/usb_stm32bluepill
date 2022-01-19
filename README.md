@@ -1,5 +1,5 @@
 # usb_stm32bluepill
-Code written while learning USB communication on stm32 bluepill.
+## Code written while learning USB communication on stm32 bluepill.
 
 my_usb_blink contains a modified version of the code from the usb-tutorial repository.
 
