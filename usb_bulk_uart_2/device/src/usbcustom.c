@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * USB bulk transfer example with UART communication
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -12,10 +12,13 @@
 #include "uart.h"
 
 
+//data buffer
+static uint8_t data_buffer[BUFFER_LEN_BYTES];
 //bool variables
 static volatile bool is_configured = false;
+static volatile bool is_buffer_full = false;
 //variable that keeps track of how much data is stored inside the data buffer
-
+static uint8_t data_size = 0;
 // USB device instance
 static usbd_device *usb_device;
 // buffer for control requests
@@ -55,42 +58,68 @@ void usb_init(void)
 void usb_set_config(usbd_device *usbd_dev, uint16_t wValue __attribute__((unused)))
 {
     usbd_ep_setup(usbd_dev,
-                EP_DATA_IN,
+                EP_DATA_OUT,
                 USB_ENDPOINT_ATTR_BULK,
                 BULK_MAX_PACKET_SIZE,
-                NULL);
+                handle_bulk_rx_cb);
 
     is_configured = true;
     led_blink();
 }
 
 
+void handle_bulk_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused)))
+{
+    uint16_t rx_len;
+    uint8_t temp_buffer[BULK_MAX_PACKET_SIZE];
+
+    rx_len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, temp_buffer, sizeof(temp_buffer));
+
+    if (rx_len > 0) 
+    {
+        for(uint8_t index = data_size; index < data_size + rx_len; index++)
+        {
+            data_buffer[index] = temp_buffer[index - data_size];
+        }
+
+        data_size += rx_len;
+
+        if (data_size > BUFFER_MAX_OCCUPIED_SIZE) 
+        {
+            is_buffer_full = true;
+            usbd_ep_nak_set(usb_device, EP_DATA_OUT, 1);
+        }
+    }
+}
+
+
 void handle_buffer_full(void)
 {
-    uint8_t tx_buffer[BULK_MAX_PACKET_SIZE];
+    uint8_t tx_buffer[TX_BUFFER_LEN_BYTES];
 
     if (is_configured && is_buffer_full)
     {
-        //copy bytes from 0 to BULK_MAX_PACKET_SIZE (length of tx buffer) 
+        //copy bytes from 0 to TX_BUFFER_LEN_BYTES (length of tx buffer) 
         //into tx buffer
-        for(uint16_t index = 0; index < BULK_MAX_PACKET_SIZE; index++)
+        for(uint16_t index = 0; index < TX_BUFFER_LEN_BYTES; index++)
         {
             tx_buffer[index] = data_buffer[index];
         }
 
-        //send content of tx buffer over USB
-        usbd_ep_write_packet(usbd_dev, EP_DATA_IN, tx_buffer, sizeof(tx_buffer));
+        //send content of tx buffer over UART
+        uart_tx(tx_buffer, TX_BUFFER_LEN_BYTES);
 
-        //shift all buffer by BULK_MAX_PACKET_SIZE positions toward left
-        for(uint16_t index = BULK_MAX_PACKET_SIZE; index < data_size; index++)
+        //shift all buffer by TX_BUFFER_LEN_BYTES positions toward left
+        for(uint16_t index = TX_BUFFER_LEN_BYTES; index < data_size; index++)
         {
-            data_buffer[index - BULK_MAX_PACKET_SIZE] = data_buffer[index];
+            data_buffer[index - TX_BUFFER_LEN_BYTES] = data_buffer[index];
         }
 
         //decrease data_size by length of tx buffer
-        data_size -= BULK_MAX_PACKET_SIZE;
+        data_size -= TX_BUFFER_LEN_BYTES;
 
         is_buffer_full = false;
+        usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0); 
     }
 }
 
