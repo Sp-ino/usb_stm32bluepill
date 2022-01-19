@@ -7,7 +7,11 @@
  * uart.c
  */
 
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/usart.h>
 #include "uart.h"
+#include "common.h"
 
 
 void uart_init(void)

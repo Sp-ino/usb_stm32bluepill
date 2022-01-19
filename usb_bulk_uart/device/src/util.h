@@ -16,10 +16,14 @@
 #include "common.h"
 
 
-/*Blink the LED connected to PC13*/
+/**
+ * @brief Blink the LED connected to PC13
+ */
 void led_blink(void);
 
-/*Initialize system*/
+/**
+ * @brief Initialize system
+ */
 void sys_init(void);
 
 #endif

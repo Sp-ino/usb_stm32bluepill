@@ -11,17 +11,18 @@
 #define UART_H
 
 
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-#include <libopencm3/stm32/usart.h>
-
-
-/*Initialize UART*/
+/**
+ * @brief Init UART
+ */
 void uart_init(void);
 
-
-/*Send buffer over UART by inserting a linefeed every time
-that the index is a multiple of 64*/
+/**
+ * @brief Send buffer over UART by inserting a linefeed every time
+ * that the index is a multiple of 64
+ * 
+ * @param buffer 
+ * @param len 
+*/
 void uart_tx(uint8_t *buffer, uint16_t len);
 
 #endif

@@ -8,6 +8,7 @@
  */
 
 #include "descriptor.h"
+#include <stdlib.h>
 
 
 const char *const usb_strings[] = 

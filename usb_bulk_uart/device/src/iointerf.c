@@ -4,28 +4,49 @@
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
  * 
- * usbcustom.c
+ * userint.c
  */
 
-#include "usbcustom.h"
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
+#include <stdlib.h>
+#include "common.h"
 #include "util.h"
+#include "descriptor.h"
+#include "iointerf.h"
 #include "uart.h"
 
 
+typedef struct
+{
+    uint8_t bytes[BUFFER_LEN_BYTES];
+    uint8_t data_size;
+    bool is_full;
+} databuf;
+
+static bool is_configured = false;
+
 //data buffer
-static uint8_t data_buffer[BUFFER_LEN_BYTES];
-//bool variables
-static volatile bool is_configured = false;
-static volatile bool is_buffer_full = false;
-//variable that keeps track of how much data is stored inside the data buffer
-static uint8_t data_size = 0;
+static databuf data_buffer;
+
 // USB device instance
 static usbd_device *usb_device;
+
 // buffer for control requests
 static uint8_t usbd_control_buffer[256];
 
 
 /*-------------------------- Function definitions -------------------------------------*/
+static void init_data_buffer(void)
+{
+    for (int index = 0; index < BUFFER_LEN_BYTES; index++)
+    {
+        data_buffer.bytes[index] = 0x00;
+    }
+    data_buffer.data_size = 0;
+    data_buffer.is_full = false;
+}
+
 
 void usb_init(void) 
 {
@@ -37,7 +58,7 @@ void usb_init(void)
     gpio_clear(GPIOA, GPIO12);
     delay(80);
 
-    //usb_init_serial_num();
+    init_data_buffer();
 
     // create USB device
     usb_device = usbd_init(&st_usbfs_v1_usb_driver, &usb_device_desc, usb_config_descs,
@@ -61,14 +82,14 @@ void usb_set_config(usbd_device *usbd_dev, uint16_t wValue __attribute__((unused
                 EP_DATA_OUT,
                 USB_ENDPOINT_ATTR_BULK,
                 BULK_MAX_PACKET_SIZE,
-                handle_bulk_rx_cb);
+                handle_usb_packet_rx_cb);
 
     is_configured = true;
     led_blink();
 }
 
 
-void handle_bulk_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused)))
+void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused)))
 {
     uint16_t rx_len;
     uint8_t temp_buffer[BULK_MAX_PACKET_SIZE];
@@ -77,48 +98,53 @@ void handle_bulk_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused))
 
     if (rx_len > 0) 
     {
-        for(uint8_t index = data_size; index < data_size + rx_len; index++)
+        for(uint8_t index = data_buffer.data_size; index < data_buffer.data_size + rx_len; index++)
         {
-            data_buffer[index] = temp_buffer[index - data_size];
+            data_buffer.bytes[index] = temp_buffer[index - data_buffer.data_size];
         }
 
-        data_size += rx_len;
+        data_buffer.data_size += rx_len;
 
-        if (data_size > BUFFER_MAX_OCCUPIED_SIZE) 
+        if (data_buffer.data_size > BUFFER_MAX_OCCUPIED_SIZE) 
         {
-            is_buffer_full = true;
+            data_buffer.is_full = true;
             usbd_ep_nak_set(usb_device, EP_DATA_OUT, 1);
         }
     }
 }
 
 
-void handle_buffer_full(void)
+void handle_main_tasks(void)
 {
     uint8_t tx_buffer[TX_BUFFER_LEN_BYTES];
 
-    if (is_configured && is_buffer_full)
+    if (!is_configured)
+    {
+        return;
+    }
+
+    if (data_buffer.is_full)
     {
         //copy bytes from 0 to TX_BUFFER_LEN_BYTES (length of tx buffer) 
         //into tx buffer
         for(uint16_t index = 0; index < TX_BUFFER_LEN_BYTES; index++)
         {
-            tx_buffer[index] = data_buffer[index];
+            tx_buffer[index] = data_buffer.bytes[index];
         }
 
         //send content of tx buffer over UART
         uart_tx(tx_buffer, TX_BUFFER_LEN_BYTES);
 
         //shift all buffer by TX_BUFFER_LEN_BYTES positions toward left
-        for(uint16_t index = TX_BUFFER_LEN_BYTES; index < data_size; index++)
+        for(uint16_t index = TX_BUFFER_LEN_BYTES; index < data_buffer.data_size; index++)
         {
-            data_buffer[index - TX_BUFFER_LEN_BYTES] = data_buffer[index];
+            data_buffer.bytes[index - TX_BUFFER_LEN_BYTES] = data_buffer.bytes[index];
         }
 
-        //decrease data_size by length of tx buffer
-        data_size -= TX_BUFFER_LEN_BYTES;
+        //decrease data_buffer.data_size by length of tx buffer
+        data_buffer.data_size -= TX_BUFFER_LEN_BYTES;
 
-        is_buffer_full = false;
+        data_buffer.is_full = false;
         usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0); 
     }
 }
