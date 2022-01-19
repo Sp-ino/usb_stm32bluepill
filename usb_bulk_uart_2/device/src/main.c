@@ -7,7 +7,7 @@
  * main.c
  */
 
-#include "usbcustom.h"
+#include "iointerf.h"
 #include "util.h"
 #include "uart.h"
 
@@ -22,7 +22,7 @@ int main(void)
     //main loop
     while(1) 
     {
-        handle_buffer_full();
+        handle_main_tasks();
     }
 
     return 0;

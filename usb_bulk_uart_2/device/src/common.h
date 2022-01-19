@@ -27,6 +27,7 @@ uint32_t millis(void);
 
 /**
  * @brief Delays execution (busy wait)
+ * 
  * @param ms delay length, in milliseconds
  */
 void delay(uint32_t ms);
