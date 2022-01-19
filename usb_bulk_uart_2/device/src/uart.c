@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication
+ * USB bulk transfer example with UART communication - 2
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -26,10 +26,16 @@ void uart_init(void)
 }
 
 
-void uart_rx(uint8_t *buffer, uint16_t len)
+void uart_rx(uint8_t *buffer, uint16_t datasize)
 {
-    for (uint16_t index = 0; index < len; index++)
+    uint8_t byte;
+    byte = usart_rcv(USART1);
+    buffer[datasize] = byte
+
+    gpio_toggle(GPIOC, GPIO13);   
+
+    if (datasize > BUFFER_MAX_DATA_SIZE)
     {
-        
+        is_buffer_full = true;
     }
 }

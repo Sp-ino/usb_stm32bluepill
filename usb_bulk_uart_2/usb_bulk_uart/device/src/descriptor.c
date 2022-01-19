@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * USB bulk transfer example with UART communication
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -33,7 +33,7 @@ static const struct usb_endpoint_descriptor comm_endpoint_descs[] =
     {
         .bLength = USB_DT_ENDPOINT_SIZE,
         .bDescriptorType = USB_DT_ENDPOINT,
-        .bEndpointAddress = EP_DATA_IN,                //endpoint for host-to-device transmission
+        .bEndpointAddress = EP_DATA_OUT,                //endpoint for host-to-device transmission
         .bmAttributes = USB_ENDPOINT_ATTR_BULK,
         .wMaxPacketSize = BULK_MAX_PACKET_SIZE,
         .bInterval = 0,

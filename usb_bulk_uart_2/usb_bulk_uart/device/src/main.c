@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * USB bulk transfer example with UART communication
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -22,7 +22,6 @@ int main(void)
     //main loop
     while(1) 
     {
-        uart_rx(data_buffer, data_size);
         handle_buffer_full();
     }
 

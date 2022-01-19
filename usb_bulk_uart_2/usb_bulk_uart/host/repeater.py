@@ -6,7 +6,7 @@ Created on Sat Jan  8 17:17:54 2022
 @author: spino
 
 
-USB bulk transfer example with UART communication - 2
+USB bulk transfer example with UART communication
  
 Copyright (c) 2022 Valerio Spinogatti
 Licensed under GNU license
@@ -21,7 +21,7 @@ import time
 
 
 #constant definitions
-READ_EP = 0x82
+WRITE_EP = 0x01
 PACKET_SIZE_BYTES = 64
 BUFFER_SIZE_PACKETS = 4
 BUFFER_SIZE_BYTES = BUFFER_SIZE_PACKETS * PACKET_SIZE_BYTES
@@ -51,15 +51,26 @@ for config in dev:
 # set configuration
 dev.set_configuration()
 
-readbuf = array.array('b', [])
+#write initial data. It is an array of 128 bytes of value 0xFF
+initial_data = array.array('B', [0x30 for i in range(0,PACKET_SIZE_BYTES)])
+try:
+    writelen = dev.write(WRITE_EP, initial_data, timeout = USB_TIMEOUT)
+except: 
+    print("USB initial write failed")
+    
+if writelen:
+    print("Number of bytes sent: ", writelen)
+    
 
 #------------------------------Main while loop---------------------------------
 while True:
-    #try to read data
+    data = input("Values to be written over USB: ")
+    
+    #send data
     try:
-        readbuf = dev.read(READ_EP, PACKET_SIZE_BYTES, timeout = USB_TIMEOUT)
+        writelen = dev.write(WRITE_EP, data, timeout = USB_TIMEOUT)
     except: 
-        pass
+        print("USB write failed")
         
-    if readbuf:
-        print("Received bytes: ", readbuf)
+    if writelen:
+        print("Number of bytes sent: ", writelen)
