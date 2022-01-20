@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication
+ * USB bulk transfer example with UART communication - 2
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -46,9 +46,7 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev,
 
 /**
  * @brief This function is called from the while loop inside the main. It tries
- * to keep the buffer empty by resending bytes over UART and handles a "buffer
- * full" event.
- * 
+ * to keep the buffer empty by resending bytes over UART.
  */
 void handle_main_tasks(void);
 

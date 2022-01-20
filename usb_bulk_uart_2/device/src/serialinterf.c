@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication
+ * USB bulk transfer example with UART communication - 2
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -21,16 +21,14 @@ typedef struct
 {
     uint8_t bytes[BULK_MAX_PACKET_SIZE];
     uint8_t data_size;
+    bool is_there_data;
 } databuf;
 
-static uint8_t write_buf_index = 0;
-static uint8_t read_buf_index = 0;
-static uint8_t n_full_buf = 0;
-
+//This variables stores whether the device configuration has been performed or not
 static bool is_configured = false;
 
-//ping-pong buffer
-static databuf pingpong_buffer[PINGPONG_BUF_SIZE];
+//data buffer
+static databuf rx_buffer;
 
 // USB device instance
 static usbd_device *usb_device;
@@ -41,16 +39,14 @@ static uint8_t usbd_control_buffer[256];
 
 /*-------------------------- Function definitions -------------------------------------*/
 
-static void init_pingpong_buffer(void)
+static void init_rx_buffer(void)
 {
-    for (int index = 0; index < PINGPONG_BUF_SIZE; index++)
+    for (int index = 0; index < BULK_MAX_PACKET_SIZE; index++)
     {
-        for (int bytenum = 0; bytenum < BULK_MAX_PACKET_SIZE; bytenum++)
-        {
-            pingpong_buffer[index].bytes[bytenum] = 0x00;
-        }
-        pingpong_buffer[index].data_size = 0;
+        rx_buffer.bytes[index] = 0x00;
     }
+    rx_buffer.data_size = 0;
+    rx_buffer.is_there_data = false;
 }
 
 
@@ -64,7 +60,7 @@ static void usb_init(void)
     gpio_clear(GPIOA, GPIO12);
     delay(80);
 
-    init_pingpong_buffer();
+    init_rx_buffer();
 
     // create USB device
     usb_device = usbd_init(&st_usbfs_v1_usb_driver, &usb_device_desc, usb_config_descs,
@@ -106,88 +102,47 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((un
 {
     uint16_t rx_len;
 
-    //if both buffers are full then return because no data can be received. The host will send 
-    //data again later
-    if (n_full_buf == 2)
+    //if data has been received, return until the data has been handled.
+    if (rx_buffer.is_there_data)
     {
         return;
     }
 
-    /* 
-     * not sure why this function should not work as it is, but in case it doesn't, I might try this:
-     *
-     * n_full_buf++;
-     * 
-     * then, after usbd_ep_read_packet (which sets endpoint to VALID)
-     * 
-     * if (rx_len > 0)
-     * {
-     *      //toggle write_buf_index
-     *      write_buf_index = (uint8_t)!((bool)write_buf_index);
-     * 
-     *      //n_full_buf is kept as it is, because data has been received and the 
-     *      //a priori decision to increment it was correct 
-     * } 
-     * else
-     * {
-     *      //do not toggle write_buf_index and decrement n_full_buf
-     *      //because no data has been received
-     *      n_full_buf--;
-     * }
-    */
+    rx_len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, rx_buffer.bytes,
+                                sizeof(rx_buffer.bytes));
 
-   //read packet and set endpoint to VALID
-    rx_len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, pingpong_buffer[write_buf_index].bytes,
-                                sizeof(pingpong_buffer[write_buf_index].bytes));
+    rx_buffer.data_size = rx_len;
 
-    //return if no data has been received
-    if (rx_len == 0)
+    if (rx_len > 0)
     {
-        return; 
-    }  
-
-    pingpong_buffer[write_buf_index].data_size = rx_len;
-    
-    //increment n_full_buf
-    n_full_buf++;
-
-    if (n_full_buf == 1)
-    {
-        read_buf_index = write_buf_index;
+        rx_buffer.is_there_data = true;
     }
-
-    //put write_buf_index to 1 if it is 0 and viceversa to point to the other buffer
-    write_buf_index = (uint8_t)!((bool)write_buf_index);    
 }
 
 
 void handle_main_tasks(void)
 {
-    uint8_t index;
+    uint8_t len;
+    uint8_t tx_buffer[BULK_MAX_PACKET_SIZE];
 
-    if (!is_configured || n_full_buf == 0)
+    if (!is_configured || !rx_buffer.is_there_data)
     {
         return;
     }
 
-    if (pingpong_buffer[read_buf_index].data_size > 0)
+    /* Copy rx buffer into tx buffer before setting is_there_data to false
+     * This should help to speed up things a little, because possible delays
+     * related to the UART peripheral won't prevent the device from receiving
+     * a new packet from the host.
+    */
+    for (uint8_t index = 0; index < BULK_MAX_PACKET_SIZE; index++)
     {
-        index = pingpong_buffer[read_buf_index].data_size - 1;
-
-        uart_tx(pingpong_buffer[read_buf_index].bytes[index]); 
-
-        pingpong_buffer[read_buf_index].data_size--;
+        tx_buffer[index] = rx_buffer.bytes[index];
     }
+    len = rx_buffer.data_size;
+    rx_buffer.is_there_data = false;
 
-    if (pingpong_buffer[read_buf_index].data_size == 0)
-    {
-        uart_tx('\r');
-        uart_tx('\n');        
-
-        read_buf_index = (uint8_t)!((bool)read_buf_index);
-        
-        n_full_buf--;
-    }
+    uart_tx(tx_buffer, len);
 }
 
 

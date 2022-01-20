@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication
+ * USB bulk transfer example with UART communication - 2
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -30,7 +30,13 @@ void uart_init(void)
 }
 
 
-void uart_tx(uint8_t c)
+void uart_tx(uint8_t *buffer, uint16_t len)
 {
-    usart_send_blocking(USART1, c);
+    for (uint16_t index = 0; index < len; index++)
+    {
+        usart_send_blocking(USART1, buffer[index]); 
+    }
+    
+    usart_send_blocking(USART1, '\r');
+    usart_send_blocking(USART1, '\n');
 }
