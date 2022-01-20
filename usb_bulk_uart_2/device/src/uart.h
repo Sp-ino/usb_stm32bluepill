@@ -17,12 +17,11 @@
 void uart_init(void);
 
 /**
- * @brief Send buffer over UART by inserting a linefeed every time
- * that the index is a multiple of 64
+ * @brief Send a byte over UART1
  * 
  * @param buffer 
  * @param len 
 */
-void uart_tx(uint8_t *buffer, uint16_t len);
+void uart_tx(uint8_t c);
 
 #endif

@@ -30,17 +30,7 @@ void uart_init(void)
 }
 
 
-void uart_tx(uint8_t *buffer, uint16_t len)
+void uart_tx(uint8_t c)
 {
-    for (uint16_t index = 0; index < len; index++)
-    {
-        usart_send_blocking(USART1, buffer[index]); 
-
-        //insert a line feed every 64 characters
-        if (index % 64 == 0)
-        {
-            usart_send_blocking(USART1, '\r');
-            usart_send_blocking(USART1, '\n');
-        }
-    }
+    usart_send_blocking(USART1, c);
 }

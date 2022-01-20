@@ -23,6 +23,10 @@ typedef struct
     uint8_t data_size;
 } databuf;
 
+static uint8_t write_buf_index = 0;
+static uint8_t read_buf_index = 0;
+static uint8_t n_full_buf = 0;
+
 static bool is_configured = false;
 
 //ping-pong buffer
@@ -102,20 +106,88 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((un
 {
     uint16_t rx_len;
 
-    rx_len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, temp_buffer, sizeof(temp_buffer));
+    //if both buffers are full then return because no data can be received. The host will send 
+    //data again later
+    if (n_full_buf == 2)
+    {
+        return;
+    }
 
-      
+    /* 
+     * not sure why this function should not work as it is, but in case it doesn't, I might try this:
+     *
+     * n_full_buf++;
+     * 
+     * then, after usbd_ep_read_packet (which sets endpoint to VALID)
+     * 
+     * if (rx_len > 0)
+     * {
+     *      //toggle write_buf_index
+     *      write_buf_index = (uint8_t)!((bool)write_buf_index);
+     * 
+     *      //n_full_buf is kept as it is, because data has been received and the 
+     *      //a priori decision to increment it was correct 
+     * } 
+     * else
+     * {
+     *      //do not toggle write_buf_index and decrement n_full_buf
+     *      //because no data has been received
+     *      n_full_buf--;
+     * }
+    */
+
+   //read packet and set endpoint to VALID
+    rx_len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, pingpong_buffer[write_buf_index].bytes,
+                                sizeof(pingpong_buffer[write_buf_index].bytes));
+
+    //return if no data has been received
+    if (rx_len == 0)
+    {
+        return; 
+    }  
+
+    pingpong_buffer[write_buf_index].data_size = rx_len;
+    
+    //increment n_full_buf
+    n_full_buf++;
+
+    if (n_full_buf == 1)
+    {
+        read_buf_index = write_buf_index;
+    }
+
+    //put write_buf_index to 1 if it is 0 and viceversa to point to the other buffer
+    write_buf_index = (uint8_t)!((bool)write_buf_index);    
 }
 
 
 void handle_main_tasks(void)
 {
-    if (!is_configured)
+    uint8_t index;
+
+    if (!is_configured || n_full_buf == 0)
     {
         return;
     }
 
-    
+    if (pingpong_buffer[read_buf_index].data_size > 0)
+    {
+        index = pingpong_buffer[read_buf_index].data_size - 1;
+
+        uart_tx(pingpong_buffer[read_buf_index].bytes[index]); 
+
+        pingpong_buffer[read_buf_index].data_size--;
+    }
+
+    if (pingpong_buffer[read_buf_index].data_size == 0)
+    {
+        uart_tx('\r');
+        uart_tx('\n');        
+
+        read_buf_index = (uint8_t)!((bool)read_buf_index);
+        
+        n_full_buf--;
+    }
 }
 
 
