@@ -125,35 +125,34 @@ void handle_main_tasks(void)
 {
     uint8_t tx_buffer[TX_BUFFER_LEN_BYTES];
 
-    if (!is_configured)
+    //return if usb configuration has not been performed or data buffer is not full
+    if (!is_configured || !data_buffer.is_full)
     {
         return;
     }
 
-    if (data_buffer.is_full)
+    //copy bytes from 0 to TX_BUFFER_LEN_BYTES (length of tx buffer) 
+    //into tx buffer
+    for(uint16_t index = 0; index < TX_BUFFER_LEN_BYTES; index++)
     {
-        //copy bytes from 0 to TX_BUFFER_LEN_BYTES (length of tx buffer) 
-        //into tx buffer
-        for(uint16_t index = 0; index < TX_BUFFER_LEN_BYTES; index++)
-        {
-            tx_buffer[index] = data_buffer.bytes[index];
-        }
-
-        //send content of tx buffer over UART
-        uart_tx(tx_buffer, TX_BUFFER_LEN_BYTES);
-
-        //shift all buffer by TX_BUFFER_LEN_BYTES positions toward left
-        for(uint16_t index = TX_BUFFER_LEN_BYTES; index < data_buffer.data_size; index++)
-        {
-            data_buffer.bytes[index - TX_BUFFER_LEN_BYTES] = data_buffer.bytes[index];
-        }
-
-        //decrease data_buffer.data_size by length of tx buffer
-        data_buffer.data_size -= TX_BUFFER_LEN_BYTES;
-
-        data_buffer.is_full = false;
-        usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0); 
+        tx_buffer[index] = data_buffer.bytes[index];
     }
+
+    //send content of tx buffer over UART
+    uart_tx(tx_buffer, TX_BUFFER_LEN_BYTES);
+
+    //shift all buffer by TX_BUFFER_LEN_BYTES positions toward left
+    for(uint16_t index = TX_BUFFER_LEN_BYTES; index < data_buffer.data_size; index++)
+    {
+        data_buffer.bytes[index - TX_BUFFER_LEN_BYTES] = data_buffer.bytes[index];
+    }
+
+    //decrease data_buffer.data_size by length of tx buffer
+    data_buffer.data_size -= TX_BUFFER_LEN_BYTES;
+
+    //set is_full member to false and endpoint to VALID
+    data_buffer.is_full = false;
+    usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0);
 }
 
 
