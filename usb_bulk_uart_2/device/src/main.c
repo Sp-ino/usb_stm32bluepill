@@ -7,17 +7,15 @@
  * main.c
  */
 
-#include "iointerf.h"
+#include "serialinterf.h"
 #include "util.h"
-#include "uart.h"
 
 
 /*main function*/
 int main(void) 
 {
     sys_init();
-    usb_init();
-    uart_init();
+    serial_interf_init();
 
     //main loop
     while(1) 

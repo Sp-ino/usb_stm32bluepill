@@ -13,20 +13,16 @@
 
 #include <libopencm3/usb/usbd.h>
 
-//constant definitions
-#define BUFFER_LEN_PACKETS 4
-#define BUFFER_LEN_BYTES ( BUFFER_LEN_PACKETS * BULK_MAX_PACKET_SIZE )
-#define BUFFER_MAX_OCCUPIED_SIZE ( BUFFER_LEN_BYTES - 2*BULK_MAX_PACKET_SIZE )
-#define BUFFER_OKREAD_SIZE 0
-#define TX_BUFFER_LEN_BYTES 128
-
+//macro definitions
+#define PINGPONG_BUF_SIZE 2
 
 /*-------------------------------Function prototypes------------------------------*/
 
 /**
 * @brief Initialize usb.
 */
-void usb_init(void);
+void serial_interf_init(void);
+
 
 /**
  * @brief This callback is executed when the host sets the device configuration.
@@ -37,6 +33,7 @@ void usb_init(void);
 void usb_set_config(usbd_device *usbd_dev, 
                     uint16_t wValue __attribute__((unused)));
 
+
 /**
  * @brief This callback is executed when a packet from the host is received.
  * 
@@ -45,6 +42,7 @@ void usb_set_config(usbd_device *usbd_dev,
  */
 void handle_usb_packet_rx_cb(usbd_device *usbd_dev, 
                             uint8_t ep __attribute__((unused)));
+
 
 /**
  * @brief This function is called from the while loop inside the main. It tries
