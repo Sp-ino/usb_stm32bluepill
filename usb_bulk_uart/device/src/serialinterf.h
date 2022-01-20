@@ -23,10 +23,12 @@
 
 /*-------------------------------Function prototypes------------------------------*/
 
+
 /**
 * @brief Initialize serial interface (USB and UART).
 */
 void serial_interf_init(void);
+
 
 /**
  * @brief This callback is executed when the host sets the device configuration.
@@ -37,6 +39,7 @@ void serial_interf_init(void);
 void usb_set_config(usbd_device *usbd_dev, 
                     uint16_t wValue __attribute__((unused)));
 
+
 /**
  * @brief This callback is executed when a packet from the host is received.
  * 
@@ -45,6 +48,7 @@ void usb_set_config(usbd_device *usbd_dev,
  */
 void handle_usb_packet_rx_cb(usbd_device *usbd_dev, 
                             uint8_t ep __attribute__((unused)));
+
 
 /**
  * @brief This function is called from the while loop inside the main. It

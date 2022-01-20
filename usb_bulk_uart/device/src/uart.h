@@ -16,6 +16,7 @@
  */
 void uart_init(void);
 
+
 /**
  * @brief Send buffer over UART by inserting a linefeed every time
  * that the index is a multiple of 64
