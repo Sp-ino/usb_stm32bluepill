@@ -25,7 +25,7 @@ enum usb_strings_index
     STRINGS_MANUFACTURER_ID = 1,
     STRINGS_PRODUCT_ID,
     STRINGS_SERIAL_NUMBER_ID,
-    STRINGS_DATA_INTERF_ID,
+    STRINGS_DATA_INTERFACE_ID,
 };
 
 
@@ -49,13 +49,13 @@ static const struct usb_interface_descriptor comm_interf_descs[] =
     {
         .bLength = USB_DT_INTERFACE_SIZE,
         .bDescriptorType = USB_DT_INTERFACE,
-        .bInterfaceNumber = INTERF_NUM,
+        .bInterfaceNumber = INTERFACE_NUM,
         .bAlternateSetting = 0,
         .bNumEndpoints = sizeof(comm_endpoint_descs) / sizeof(comm_endpoint_descs[0]),
         .bInterfaceClass = USB_CLASS_VENDOR,            //vendor class
         .bInterfaceSubClass = 0,
         .bInterfaceProtocol = 0,                        //vendor specific protocol
-        .iInterface = STRINGS_DATA_INTERF_ID,
+        .iInterface = STRINGS_DATA_INTERFACE_ID,
         .endpoint = comm_endpoint_descs,
         .extra = NULL,
         .extralen = 0,

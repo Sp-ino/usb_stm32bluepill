@@ -13,7 +13,7 @@
 #include "common.h"
 #include "util.h"
 #include "descriptor.h"
-#include "iointerf.h"
+#include "serialinterf.h"
 #include "uart.h"
 
 
@@ -48,7 +48,7 @@ static void init_data_buffer(void)
 }
 
 
-void usb_init(void) 
+static void usb_init(void) 
 {
     rcc_periph_clock_enable(RCC_USB);
 
@@ -73,6 +73,13 @@ void usb_init(void)
     nvic_set_priority(NVIC_USB_LP_CAN_RX0_IRQ, 2 << 6);
 
     nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ);
+}
+
+
+void serial_interf_init(void)
+{
+    usb_init();
+    uart_init();
 }
 
 

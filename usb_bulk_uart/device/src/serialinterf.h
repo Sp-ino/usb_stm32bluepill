@@ -24,9 +24,9 @@
 /*-------------------------------Function prototypes------------------------------*/
 
 /**
-* @brief Initialize usb.
+* @brief Initialize serial interface (USB and UART).
 */
-void usb_init(void);
+void serial_interf_init(void);
 
 /**
  * @brief This callback is executed when the host sets the device configuration.
@@ -47,10 +47,8 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev,
                             uint8_t ep __attribute__((unused)));
 
 /**
- * @brief This function is called from the while loop inside the main. It tries
- * to keep the buffer empty by resending bytes over UART and handles a "buffer
- * full" event.
- * 
+ * @brief This function is called from the while loop inside the main. It
+ * depletes the buffer when it is full by sending its content over the UART.
  */
 void handle_main_tasks(void);
 
