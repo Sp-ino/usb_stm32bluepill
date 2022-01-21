@@ -102,12 +102,6 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((un
 {
     uint16_t rx_len;
 
-    //if data has been received, return until the data has been handled.
-    if (rx_buffer.is_there_data)
-    {
-        return;
-    }
-
     rx_len = usbd_ep_read_packet(usbd_dev, EP_DATA_OUT, rx_buffer.bytes,
                                 sizeof(rx_buffer.bytes));
 
@@ -115,6 +109,7 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((un
 
     if (rx_len > 0)
     {
+        usbd_ep_nak_set(usb_device, EP_DATA_OUT, 1);
         rx_buffer.is_there_data = true;
     }
 }
@@ -139,8 +134,10 @@ void handle_main_tasks(void)
     {
         tx_buffer[index] = rx_buffer.bytes[index];
     }
+    
     len = rx_buffer.data_size;
     rx_buffer.is_there_data = false;
+    usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0);
 
     uart_tx(tx_buffer, len);
 }
