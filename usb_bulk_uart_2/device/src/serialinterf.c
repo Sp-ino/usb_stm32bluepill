@@ -107,6 +107,10 @@ void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((un
 
     rx_buffer.data_size = rx_len;
 
+    /* if data has been received, set endpoint to NAK.
+     * handle_main_tasks will handle data and set the endpoint back to
+     * VALID.   
+    */
     if (rx_len > 0)
     {
         usbd_ep_nak_set(usb_device, EP_DATA_OUT, 1);
@@ -125,7 +129,7 @@ void handle_main_tasks(void)
         return;
     }
 
-    /* Copy rx buffer into tx buffer before setting is_there_data to false
+    /* Copy rx buffer into tx buffer before setting endpoint to VALID
      * This should help to speed up things a little, because possible delays
      * related to the UART peripheral won't prevent the device from receiving
      * a new packet from the host.
@@ -135,10 +139,19 @@ void handle_main_tasks(void)
         tx_buffer[index] = rx_buffer.bytes[index];
     }
     
+    //save data_size into len to pass it to uart_tx
     len = rx_buffer.data_size;
+
+    //set is_there_data to false to avoid resending the old data the next time
+    //this function is called
     rx_buffer.is_there_data = false;
+
+    //set endpoint to VALID. Now new data can be received because
+    //the previous data has been moved to tx_buffer and its size
+    //has been memorized
     usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0);
 
+    //Send the conent of tx_buffer over UART
     uart_tx(tx_buffer, len);
 }
 
