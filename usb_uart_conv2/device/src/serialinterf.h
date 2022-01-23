@@ -13,9 +13,6 @@
 
 #include <libopencm3/usb/usbd.h>
 
-//macro definitions
-#define PINGPONG_BUF_SIZE 2
-
 /*-------------------------------Function prototypes------------------------------*/
 
 /**
