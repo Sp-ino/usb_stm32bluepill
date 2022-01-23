@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "usbcustom.h": "c",
-        "uart.h": "c"
-    }
-}
