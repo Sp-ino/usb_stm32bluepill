@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication
+ * UART to USB converter
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license

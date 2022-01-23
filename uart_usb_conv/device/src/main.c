@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * UART to USB converter
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -11,7 +11,11 @@
 #include "util.h"
 
 
-/*main function*/
+/**
+ * @brief Main function
+ * 
+ * @return * main 
+ */
 int main(void) 
 {
     sys_init();

@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * UART to USB converter
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -12,10 +12,10 @@
 
 
 #include <libopencm3/usb/usbd.h>
-#include
+#include "descriptor.h"
 
 //macro definitions
-#define BUFFER_LEN_PACKETS 4
+#define BUFFER_LEN_PACKETS 2
 #define BUFFER_LEN_BYTES ( BUFFER_LEN_PACKETS * BULK_MAX_PACKET_SIZE )
 
 /*-------------------------------Function prototypes------------------------------*/
@@ -34,16 +34,6 @@ void serial_interf_init(void);
  */
 void usb_set_config(usbd_device *usbd_dev, 
                     uint16_t wValue __attribute__((unused)));
-
-
-/**
- * @brief This callback is executed when a packet from the host is received.
- * 
- * @param usbd_dev 
- * @param ep 
- */
-void handle_usb_packet_rx_cb(usbd_device *usbd_dev, 
-                            uint8_t ep __attribute__((unused)));
 
 
 /**

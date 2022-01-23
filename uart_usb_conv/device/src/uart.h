@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * UART to USB converter
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -17,11 +17,10 @@
 void uart_init(void);
 
 /**
- * @brief Send a byte over UART1
+ * @brief Get a byte from UART1
  * 
- * @param buffer 
- * @param len 
-*/
+ * @return uint8_t 
+ */
 uint8_t uart_getc(void);
 
 #endif

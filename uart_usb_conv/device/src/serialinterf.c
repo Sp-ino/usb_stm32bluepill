@@ -1,5 +1,5 @@
 /*
- * USB bulk transfer example with UART communication - 2
+ * UART to USB converter
  * 
  * Copyright (c) 2022 Valerio Spinogatti
  * Licensed under GNU license
@@ -39,14 +39,14 @@ static uint8_t usbd_control_buffer[256];
 
 /*-------------------------- Function definitions -------------------------------------*/
 
-static void init_rx_buffer(void)
+static void init_data_buffer(void)
 {
-    for (int index = 0; index < BULK_MAX_PACKET_SIZE; index++)
+    for (int index = 0; index < BUFFER_LEN_BYTES; index++)
     {
-        rx_buffer.bytes[index] = 0x00;
+        data_buffer.bytes[index] = 0x00;
     }
-    rx_buffer.data_size = 0;
-    rx_buffer.is_there_data = false;
+    data_buffer.data_size = 0;
+    data_buffer.is_buffer_full = false;
 }
 
 
@@ -60,7 +60,7 @@ static void usb_init(void)
     gpio_clear(GPIOA, GPIO12);
     delay(80);
 
-    init_rx_buffer();
+    init_data_buffer();
 
     // create USB device
     usb_device = usbd_init(&st_usbfs_v1_usb_driver, &usb_device_desc, usb_config_descs,
@@ -98,67 +98,58 @@ void usb_set_config(usbd_device *usbd_dev, uint16_t wValue __attribute__((unused
 }
 
 
-// void handle_usb_packet_rx_cb(usbd_device *usbd_dev, uint8_t ep __attribute__((unused)))
-// {
-//     uint16_t rx_len;
-
-//     rx_len = usbd_ep_write_packet(usbd_dev, EP_DATA_IN, rx_buffer.bytes,
-//                                 sizeof(rx_buffer.bytes));
-
-//     rx_buffer.data_size = rx_len;
-
-//     /* if data has been received, set endpoint to NAK.
-//      * handle_main_tasks will handle data and set the endpoint back to
-//      * VALID.   
-//     */
-//     if (rx_len > 0)
-//     {
-//         usbd_ep_nak_set(usb_device, EP_DATA_OUT, 1);
-//         rx_buffer.is_there_data = true;
-//     }
-// }
-
-
-void uart_rx(void)
+static void uart_rx(void)
 {
-    for
+    uint16_t datasize = data_buffer.data_size;
+
+    if (data_buffer.is_buffer_full)
+    {
+        return;
+    }
+
+    data_buffer.bytes[datasize] = uart_getc();
+    data_buffer.data_size++;
+
+    if (data_buffer.data_size > BUFFER_LEN_BYTES)
+    {
+        data_buffer.data_size = true;
+    }
+}
+
+
+static void usb_tx(void)
+{
+    uint8_t tx_buffer[BULK_MAX_PACKET_SIZE];
+
+    if (!data_buffer.is_buffer_full)
+    {
+        return;
+    }
+
+    for (uint8_t packet_index = 0; packet_index < BUFFER_LEN_PACKETS; packet_index++)
+    {
+        for (uint8_t index = 0; index < BULK_MAX_PACKET_SIZE; index++)
+        {
+            tx_buffer[index] = data_buffer.bytes[packet_index * BULK_MAX_PACKET_SIZE + index];
+        }
+
+        usbd_ep_write_packet(usb_device, EP_DATA_IN, tx_buffer, BULK_MAX_PACKET_SIZE);
+    }
+
+    data_buffer.data_size = 0;
+    data_buffer.is_buffer_full = false;
 }
 
 
 void handle_main_tasks(void)
 {
-    uint8_t len;
-    uint8_t tx_buffer[BULK_MAX_PACKET_SIZE];
-
-    if (!is_configured || !rx_buffer.is_there_data)
+    if (!is_configured)
     {
         return;
     }
 
-    /* Copy rx buffer into tx buffer before setting endpoint to VALID
-     * This should help to speed up things a little, because possible delays
-     * related to the UART peripheral won't prevent the device from receiving
-     * a new packet from the host.
-    */
-    for (uint8_t index = 0; index < BULK_MAX_PACKET_SIZE; index++)
-    {
-        tx_buffer[index] = rx_buffer.bytes[index];
-    }
-    
-    //save data_size into len to pass it to uart_tx
-    len = rx_buffer.data_size;
-
-    //set is_there_data to false to avoid resending the old data the next time
-    //this function is called
-    rx_buffer.is_there_data = false;
-
-    //set endpoint to VALID. Now new data can be received because
-    //the previous data has been moved to tx_buffer and its size
-    //has been memorized
-    usbd_ep_nak_set(usb_device, EP_DATA_OUT, 0);
-
-    //Send the conent of tx_buffer over UART
-    uart_tx(tx_buffer, len);
+    uart_rx();
+    usb_tx();
 }
 
 
