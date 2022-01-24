@@ -100,20 +100,18 @@ void usb_set_config(usbd_device *usbd_dev, uint16_t wValue __attribute__((unused
 
 static void uart_rx(void)
 {
-    uint16_t datasize = data_buffer.data_size;
-
     if (data_buffer.is_buffer_full)
     {
         return;
     }
 
-    data_buffer.bytes[datasize] = uart_getc();
-    data_buffer.data_size++;
-
-    if (data_buffer.data_size > BUFFER_LEN_BYTES)
+    while (data_buffer.data_size < data_buffer.is_buffer_full)
     {
-        data_buffer.data_size = true;
+        data_buffer.bytes[data_buffer.data_size] = uart_getc();
+        data_buffer.data_size++;
     }
+        
+    data_buffer.is_buffer_full = true;
 }
 
 

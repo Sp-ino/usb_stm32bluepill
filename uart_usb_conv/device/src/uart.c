@@ -32,5 +32,6 @@ void uart_init(void)
 
 uint8_t uart_getc(void)
 {
+    usart_wait_recv_ready(USART1);
     return usart_recv(USART1);
 }
