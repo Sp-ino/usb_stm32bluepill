@@ -14,6 +14,7 @@ Licensed under GNU license
 repeater.py
 """
 
+from xml.etree.ElementTree import tostringlist
 import usb.core
 import array
 import sys
@@ -27,6 +28,9 @@ BUFFER_SIZE_PACKETS = 4
 BUFFER_SIZE_BYTES = BUFFER_SIZE_PACKETS * PACKET_SIZE_BYTES
 USB_TIMEOUT = 5000
 
+# str = "diocaro"
+# for i in range(len(str)):
+#     print(bytearray(str[i], 'ascii'))
 
 #-----------------------------Initialization-----------------------------------
 # find device
@@ -66,13 +70,10 @@ if writelen:
 while True:
     data = input("Values to be written over USB: ")
     
-    #send data
-    writelen = dev.write(WRITE_EP, data, timeout = USB_TIMEOUT)
-
-    # try:
-    #     writelen = dev.write(WRITE_EP, bytearray(data), timeout = USB_TIMEOUT)
-    # except: 
-    #     print("USB write failed")
+    try:
+        writelen = dev.write(WRITE_EP, data , timeout = USB_TIMEOUT)
+    except: 
+        print("USB write failed")
         
     if writelen:
         print("Number of bytes sent: ", writelen)
