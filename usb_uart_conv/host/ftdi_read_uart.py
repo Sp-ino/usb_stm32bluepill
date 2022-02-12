@@ -4,7 +4,7 @@ Script to read data from UART with FTDI
 Copyright (c) 2022 Valerio Spinogatti
 Licensed under GNU license
 
-ftdi_test.py
+ftdi_read_uart.py
 """
 
 from numpy import size
