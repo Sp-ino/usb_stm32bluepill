@@ -1,8 +1,5 @@
 """
-The purpose of this module is to test the bluepill-based UART converter
-with the FTDI board.
-
-USB bulk transfer example with UART communication
+Script to read data from UART with FTDI
 
 Copyright (c) 2022 Valerio Spinogatti
 Licensed under GNU license
