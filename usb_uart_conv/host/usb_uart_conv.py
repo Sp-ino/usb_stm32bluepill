@@ -67,10 +67,12 @@ while True:
     data = input("Values to be written over USB: ")
     
     #send data
-    try:
-        writelen = dev.write(WRITE_EP, data, timeout = USB_TIMEOUT)
-    except: 
-        print("USB write failed")
+    writelen = dev.write(WRITE_EP, data, timeout = USB_TIMEOUT)
+
+    # try:
+    #     writelen = dev.write(WRITE_EP, bytearray(data), timeout = USB_TIMEOUT)
+    # except: 
+    #     print("USB write failed")
         
     if writelen:
         print("Number of bytes sent: ", writelen)
