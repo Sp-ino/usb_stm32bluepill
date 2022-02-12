@@ -13,26 +13,20 @@ ftdi_test.py
 import pyftdi.serialext as pser
 import pyftdi.ftdi as ftdi
 import serial.serialutil
-import time
 
 
-buffer = []
-print(ftdi.Ftdi.list_devices())
-try:
-    ftdi_dev = pser.serial_for_url("ftdi:///1", baudrate = 38400)
-except serial.serialutil.SerialException as e:
-    raise OSError(e)
+def main():
+    buffer = []
+    # print(ftdi.Ftdi.list_devices())
+    try:
+        ftdi_dev = pser.serial_for_url("ftdi:///1", baudrate = 38400)
+    except serial.serialutil.SerialException as e:
+        raise OSError(e)
 
-while True:
-    buffer = ftdi_dev.read(16)
+    while True:
+        received_bytes = ftdi_dev.read(8)
+        print(received_bytes.decode('utf-8'))
 
-    print(buffer)
 
-    # print("Buffering     ", end = '\r')
-    # time.sleep(0.5)
-    # print("Buffering .   ", end = '\r')
-    # time.sleep(0.5)
-    # print("\rBuffering .. ", end  = '\r')
-    # time.sleep(0.5)
-    # print("\rBuffering ...", end = '\r')
-    # time.sleep(0.5)
+if __name__ == "__main__":
+    main()
