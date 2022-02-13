@@ -7,6 +7,11 @@ Created on Sat Jan  8 17:17:54 2022
 
 
 USB bulk transfer example with UART communication
+
+This script has been added because the detach_kernel
+part has to be removed on windows. Note that on Win the
+repeater device requires libusbK as a driver. LibusbK
+can be installed with Zadig.
  
 Copyright (c) 2022 Valerio Spinogatti
 Licensed under GNU license
@@ -48,15 +53,6 @@ def main():
     #is stopped and then run again without resetting the device
     dev.reset()
 
-    # detach kernel driver
-    for config in dev:
-        for interf_num in range(config.bNumInterfaces):
-            if dev.is_kernel_driver_active(interf_num):
-                try:
-                    dev.detach_kernel_driver(interf_num)
-                except usb.core.USBError as e:
-                    sys.exit("Could not detatch kernel driver from interface({0}): {1}".format(interf_num, str(e)))    
-        
     # set configuration
     dev.set_configuration()
 

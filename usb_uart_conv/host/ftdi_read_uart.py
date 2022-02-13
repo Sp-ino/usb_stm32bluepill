@@ -35,8 +35,13 @@ def main():
         raise OSError(e)
 
     while True:
-        received_bytes = ftdi_dev.read(8)
-        print(received_bytes.decode('utf-8'))
+        try:
+            received_bytes = ftdi_dev.read(8)
+            print(received_bytes.decode('utf-8'))
+        except KeyboardInterrupt:
+            break
+
+    print("Program terminated by user")
 
 
 if __name__ == "__main__":
