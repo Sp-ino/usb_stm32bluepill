@@ -7,10 +7,15 @@ Licensed under GNU license
 ftdi_read_uart.py
 """
 
-from numpy import size
 import pyftdi.serialext as pser
 import pyftdi.ftdi as ftdi
 import serial.serialutil
+from signal import signal, SIGINT
+
+
+def exit_handler(signal_received, frame):
+    print('\n\nSIGINT or CTRL-C detected. Exiting gracefully.')
+    exit(0)
 
 
 def print_devices():
@@ -25,7 +30,11 @@ def print_devices():
 
 
 def main():
+    #Read-only variables
     BAUDRATE = 38400
+
+    #Registering ctrl+c callback
+    signal(SIGINT, exit_handler)
 
     print_devices()
 
@@ -35,13 +44,8 @@ def main():
         raise OSError(e)
 
     while True:
-        try:
-            received_bytes = ftdi_dev.read(8)
-            print(received_bytes.decode('utf-8'))
-        except KeyboardInterrupt:
-            break
-
-    print("Program terminated by user")
+        received_bytes = ftdi_dev.read(8)
+        print(received_bytes.decode('utf-8'))
 
 
 if __name__ == "__main__":

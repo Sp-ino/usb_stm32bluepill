@@ -19,7 +19,6 @@ Licensed under GNU license
 repeater.py
 """
 
-from cgitb import handler
 import usb.core
 import array
 import sys
