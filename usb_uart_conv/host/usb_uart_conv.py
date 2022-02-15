@@ -26,28 +26,28 @@ def exit_handler(signal_received, frame):
 
 
 def main():
-    #constant definitions
+    # Read-only variable definitions
     WRITE_EP = 0x01
     PACKET_SIZE_BYTES = 64
     BUFFER_SIZE_PACKETS = 4
     BUFFER_SIZE_BYTES = BUFFER_SIZE_PACKETS * PACKET_SIZE_BYTES
     USB_TIMEOUT = 5000
 
-    #registering CTRL+C interrupt handler
+    # Register CTRL+C interrupt handler
     signal(SIGINT, exit_handler)
 
     #-----------------------------Initialization-----------------------------------
-    # find device
+    # Find device
     dev = usb.core.find(idVendor=0x0297, idProduct=0x0297)
 
     if dev is None:
         sys.exit("repeater: device not found")
 
-    #reset device. necessary to avoid driver conflicts that occur when this application
-    #is stopped and then run again without resetting the device
+    # Reset device. Necessary to avoid driver conflicts that occur when this application
+    # is stopped and then run again without resetting the device
     dev.reset()
 
-    # detach kernel driver
+    # Detach kernel driver
     for config in dev:
         for interf_num in range(config.bNumInterfaces):
             if dev.is_kernel_driver_active(interf_num):
@@ -56,10 +56,10 @@ def main():
                 except usb.core.USBError as e:
                     sys.exit("Could not detatch kernel driver from interface({0}): {1}".format(interf_num, str(e)))    
         
-    # set configuration
+    # Set configuration
     dev.set_configuration()
 
-    #write initial data. It is an array of 128 bytes of value 0xFF
+    # Write initial data. It is an array of 128 bytes of value 0xFF
     initial_data = array.array('B', [0x30 for i in range(0,PACKET_SIZE_BYTES)])
     try:
         writelen = dev.write(WRITE_EP, initial_data, timeout = USB_TIMEOUT)

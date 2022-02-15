@@ -55,7 +55,7 @@ def main():
     signal(SIGINT, exit_handler)
 
     # Print useful information
-    print("Program for reading utf-8 encoded UART bytes with FTDI. Hit CTRL+C to terminate.")
+    print("\nProgram for reading utf-8 encoded UART bytes with FTDI. Hit CTRL+C to terminate.")
 
     # Find device(s)
     device_url = find_devices()
@@ -70,7 +70,11 @@ def main():
         raise OSError(e)
 
     while True:
-        received_bytes = ftdi_dev.read(8)
+        try:
+            received_bytes = ftdi_dev.read(32)
+        except UnicodeDecodeError as e:
+            print("\nThere was an error while decoding received bytes. Maybe some bytes have been corrupted.\n")
+            print(e)
         print(received_bytes.decode('utf-8'))
 
 
