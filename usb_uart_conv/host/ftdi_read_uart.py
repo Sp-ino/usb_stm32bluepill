@@ -18,15 +18,29 @@ def exit_handler(signal_received, frame):
     exit(0)
 
 
-def print_devices():
+def find_devices():
     possible_ftdi_devices = ftdi.Ftdi.list_devices()
     print(f"\nFound {len(possible_ftdi_devices)} FTDI devices.")
     for n, dev in enumerate(possible_ftdi_devices):
         print(f"\nDevice {n}:")
         for key, elem in zip(dev[0]._fields, dev[0]):
             print(key, "=", elem)
-
     print("\n")
+
+    if len(possible_ftdi_devices) == 0:
+        print("Warning. No devices found.\n")
+        return None
+
+    elif len(possible_ftdi_devices) == 1:
+        vid = possible_ftdi_devices[0][0][0]
+        pid = possible_ftdi_devices[0][0][1]
+        return f"ftdi://{str(hex(vid))}:{str(hex(pid))}/1"
+
+    elif len(possible_ftdi_devices) > 1:
+        print("Warning: more than one FTDI device found. \nReturning URL of the first one that was enumerated.")
+        vid = possible_ftdi_devices[0][0][0]
+        pid = possible_ftdi_devices[0][0][1]
+        return f"ftdi://{str(hex(vid))}:{str(hex(pid))}/1"
 
 
 def main():
@@ -36,10 +50,13 @@ def main():
     #Registering ctrl+c callback
     signal(SIGINT, exit_handler)
 
-    print_devices()
+    device_url = find_devices()
+    if not device_url:
+        raise OSError("No FTDI device found. Exiting.")
+    print(device_url)
 
     try:
-        ftdi_dev = pser.serial_for_url("ftdi:///1", baudrate = BAUDRATE)
+        ftdi_dev = pser.serial_for_url(device_url, baudrate = BAUDRATE)
     except serial.serialutil.SerialException as e:
         raise OSError(e)
 
