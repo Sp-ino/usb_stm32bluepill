@@ -44,15 +44,24 @@ def find_devices():
 
 
 def main():
-    #Read-only variables
+    # Read-only variables
     BAUDRATE = 38400
+    STANDARD_BAUDRATES = [50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
-    #Registering ctrl+c callback
+    if BAUDRATE not in STANDARD_BAUDRATES:
+        raise Warning("Baudrate value is not a standard value.")
+
+    # Registering ctrl+c callback
     signal(SIGINT, exit_handler)
 
+    # Print useful information
+    print("Program for reading utf-8 encoded UART bytes with FTDI. Hit CTRL+C to terminate.")
+
+    # Find device(s)
     device_url = find_devices()
     if not device_url:
         raise OSError("No FTDI device found. Exiting.")
+
     print(device_url)
 
     try:
