@@ -22,9 +22,6 @@ import sys
 
 #constant definitions
 READ_EP = 0x82
-PACKET_SIZE_BYTES = 64
-BUFFER_SIZE_PACKETS = 2
-BUFFER_SIZE_BYTES = BUFFER_SIZE_PACKETS * PACKET_SIZE_BYTES
 USB_TIMEOUT = 5000
 
 
@@ -54,7 +51,7 @@ dev.set_configuration()
 
 #------------------------------Main while loop---------------------------------
 while True:
-    rx_buffer = array.array('b', [0x00 for i in range(0, BUFFER_SIZE_BYTES)])
+    rx_buffer = array.array('b', [0x00])
     readlen = None
 
     #read data

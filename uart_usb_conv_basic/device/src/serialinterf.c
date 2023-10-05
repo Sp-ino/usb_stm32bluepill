@@ -17,18 +17,8 @@
 #include "uart.h"
 
 
-typedef struct
-{
-    uint8_t bytes[BUFFER_LEN_BYTES];
-    uint8_t data_size;
-    bool is_buffer_full;
-} databuf;
-
 //This variables stores whether the device configuration has been performed or not
 static bool is_configured = false;
-
-//data buffer
-static databuf data_buffer;
 
 // USB device instance
 static usbd_device *usb_device;
@@ -36,18 +26,10 @@ static usbd_device *usb_device;
 // buffer for control requests
 static uint8_t usbd_control_buffer[256];
 
+static uint8_t single_byte;
+
 
 /*-------------------------- Function definitions -------------------------------------*/
-
-static void reset_data_buffer(void)
-{
-    for (int index = 0; index < BUFFER_LEN_BYTES; index++)
-    {
-        data_buffer.bytes[index] = 0x00;
-    }
-    data_buffer.data_size = 0;
-    data_buffer.is_buffer_full = false;
-}
 
 
 static void usb_init(void) 
@@ -60,7 +42,7 @@ static void usb_init(void)
     gpio_clear(GPIOA, GPIO12);
     delay(80);
 
-    reset_data_buffer();
+    single_byte = 0x00;
 
     // create USB device
     usb_device = usbd_init(&st_usbfs_v1_usb_driver, &usb_device_desc, usb_config_descs,
@@ -100,44 +82,13 @@ void usb_set_config(usbd_device *usbd_dev, uint16_t wValue __attribute__((unused
 
 static void uart_rx(void)
 {
-    if (data_buffer.is_buffer_full)
-    {
-        return;
-    }
-
-    for (uint16_t index = 0; index < BUFFER_LEN_BYTES; index++)
-    {
-        data_buffer.bytes[index] = uart_getc();
-        data_buffer.data_size++;
-    }
-        
-    data_buffer.is_buffer_full = true;
+    single_byte = uart_getc();
 }
 
 
 static void usb_tx(void)
 {
-    uint8_t tx_buffer[BULK_MAX_PACKET_SIZE];
-
-    if (!data_buffer.is_buffer_full)
-    {
-        return;
-    }
-
-    led_blink();
-
-    for (uint8_t packet_index = 0; packet_index < BUFFER_LEN_PACKETS; packet_index++)
-    {
-        for (uint8_t index = 0; index < BULK_MAX_PACKET_SIZE; index++)
-        {
-            tx_buffer[index] = data_buffer.bytes[packet_index * BULK_MAX_PACKET_SIZE + index];
-        }
-
-        usbd_ep_write_packet(usb_device, EP_DATA_IN, tx_buffer, BULK_MAX_PACKET_SIZE);
-    }
-
-    data_buffer.data_size = 0;
-    data_buffer.is_buffer_full = false;
+    usbd_ep_write_packet(usb_device, EP_DATA_IN, &single_byte, 1);
 }
 
 
